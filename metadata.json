@@ -1,0 +1,5 @@
+{
+  "name": "Gemini Feedback Widget",
+  "description": "A standalone, embeddable feedback widget application designed to collect user feedback, including bug reports, feature requests, and satisfaction ratings, directly from any web page.",
+  "requestFramePermissions": []
+}

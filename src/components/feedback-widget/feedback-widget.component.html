@@ -1,0 +1,217 @@
+@if (feedbackService.isOpen()) {
+  <div class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 transition-opacity duration-300" 
+       [class.invisible]="hideWidgetForCapture()" 
+       (click)="closeWidget()">
+    
+    <div 
+      class="relative bg-gray-900 text-white rounded-lg shadow-2xl w-full max-h-[90vh] flex flex-col transition-all duration-300 ease-in-out" 
+      [class.max-w-lg]="!capturedImage()"
+      [class.max-w-4xl]="capturedImage()"
+      [class.opacity-100]="feedbackService.isOpen()"
+      [class.translate-y-0]="feedbackService.isOpen()"
+      [class.opacity-0]="!feedbackService.isOpen()"
+      [class.translate-y-4]="!feedbackService.isOpen()"
+      (click)="$event.stopPropagation()">
+
+      @if (capturedImage()) {
+        <!-- CROPPER VIEW -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-700">
+          <h2 class="text-xl font-semibold">Recortar Captura de Tela</h2>
+          <button (click)="cancelCrop()" class="text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        
+        <div class="p-4 overflow-hidden flex-grow bg-gray-800">
+          <div class="h-full w-full">
+            <img #cropperImage [src]="capturedImage()" alt="Captura de tela para recortar" class="max-w-full max-h-full block">
+          </div>
+        </div>
+
+        <div class="p-4 bg-gray-900/50 border-t border-gray-700 flex items-center gap-4">
+          <button (click)="cancelCrop()" class="w-full bg-gray-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-gray-700 transition-colors">Cancelar</button>
+          <button (click)="confirmCrop()" class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-blue-700 transition-colors">Confirmar e Anexar</button>
+        </div>
+      } @else {
+        <!-- FORM VIEW -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-700">
+          <h2 class="text-xl font-semibold">Compartilhe seu Feedback</h2>
+          <button (click)="closeWidget()" class="text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto flex-grow">
+          @switch (view()) {
+            @case ('form') {
+              <form (ngSubmit)="submitFeedback()" class="space-y-5">
+                <!-- Type -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Tipo de Feedback*</label>
+                  <div class="flex flex-wrap gap-2">
+                    @for (feedbackType of feedbackTypes; track feedbackType.value) {
+                      <button 
+                        type="button" 
+                        (click)="type.set(feedbackType.value)"
+                        class="px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200"
+                        [class.bg-blue-600]="type() === feedbackType.value"
+                        [class.text-white]="type() === feedbackType.value"
+                        [class.bg-gray-700]="type() !== feedbackType.value"
+                        [class.hover:bg-gray-600]="type() !== feedbackType.value">
+                        {{ feedbackType.label }}
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <!-- Title -->
+                <div>
+                  <label for="title" class="block text-sm font-medium text-gray-300 mb-1">Título</label>
+                  <input type="text" id="title" name="title" [(ngModel)]="title" maxlength="100" placeholder="ex: O botão não funciona no painel (opcional)"
+                    class="w-full bg-gray-800 border-gray-600 border rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+
+                <!-- Description -->
+                <div>
+                  <label for="description" class="block text-sm font-medium text-gray-300 mb-1">Descrição*</label>
+                  <textarea id="description" name="description" [(ngModel)]="description" required minlength="10" maxlength="5000" rows="5" placeholder="Por favor, forneça o máximo de detalhes possível..."
+                    class="w-full bg-gray-800 border rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition"
+                    [class.border-red-500]="description().length > 0 && !isDescriptionValid()"
+                    [class.border-gray-600]="description().length === 0 || isDescriptionValid()"></textarea>
+                  @if (description().length > 0 && !isDescriptionValid()) {
+                    <p class="text-xs text-red-400 mt-1">A descrição deve ter entre 10 e 5000 caracteres.</p>
+                  }
+                </div>
+
+                <!-- Severity (Conditional) -->
+                @if (type() === 'bug_report') {
+                  <div class="animate-fade-in-down">
+                    <label for="severity" class="block text-sm font-medium text-gray-300 mb-1">Gravidade</label>
+                    <select id="severity" name="severity" [(ngModel)]="severity" class="w-full bg-gray-800 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
+                      <option value="low">Baixa</option>
+                      <option value="medium">Média</option>
+                      <option value="high">Alta</option>
+                      <option value="critical">Crítica</option>
+                    </select>
+                  </div>
+                }
+
+                <!-- Name & Email -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Nome</label>
+                    <input type="text" id="name" name="name" [(ngModel)]="name" placeholder="Seu Nome" class="w-full bg-gray-800 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
+                  </div>
+                  <div>
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-1">E-mail</label>
+                    <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="seu@email.com" 
+                    class="w-full border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition"
+                    [class.bg-gray-800]="!isEmailDisabled()"
+                    [class.bg-gray-700]="isEmailDisabled()"
+                    [class.text-gray-400]="isEmailDisabled()"
+                    [disabled]="isEmailDisabled()">
+                  </div>
+                </div>
+
+                <!-- Screenshot Buttons -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Captura de Tela</label>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button type="button" (click)="captureScreen('visible')" class="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-sm font-medium py-2.5 px-3 rounded-md transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 1a1 1 0 00-1 1v2H2a1 1 0 000 2h2v10H2a1 1 0 000 2h2v2a1 1 0 002 0v-2h10v2a1 1 0 002 0v-2h2a1 1 0 000-2h-2V6h2a1 1 0 000-2h-2V2a1 1 0 00-2 0v2H6V2a1 1 0 00-1-1zM6 6h8v8H6V6z" /></svg>
+                      <span>Recortar Área Visível</span>
+                    </button>
+                    <button type="button" (click)="captureScreen('full')" class="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-sm font-medium py-2.5 px-3 rounded-md transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
+                      <span>Página Inteira</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Attachments -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-1">Anexos (Máx 5)</label>
+                  <div 
+                    (dragover)="onDragOver($event)" 
+                    (dragleave)="onDragLeave($event)" 
+                    (drop)="onDrop($event)"
+                    class="relative border-2 border-dashed border-gray-600 rounded-lg p-6 text-center transition-colors"
+                    [class.border-blue-500]="isDragging()"
+                    [class.bg-gray-800]="isDragging()">
+                    <input type="file" multiple (change)="onFileSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" id="file-upload">
+                    <svg class="mx-auto h-12 w-12 text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <p class="mt-2 text-sm text-gray-400">
+                      <label for="file-upload" class="font-medium text-blue-400 hover:text-blue-500 cursor-pointer">Envie um arquivo</label> ou arraste e solte
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF até 10MB</p>
+                  </div>
+                  
+                  @if (attachments().length > 0) {
+                    <div class="mt-4 space-y-2">
+                      @for (file of attachments(); track file.name) {
+                        <div class="flex items-center justify-between bg-gray-800 p-2 rounded-md text-sm animate-fade-in-down">
+                          <span class="truncate pr-2">{{ file.name }} ({{ getFormattedFileSize(file.size) }})</span>
+                          <button type="button" (click)="removeAttachment(file)" class="text-gray-400 hover:text-red-400 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </form>
+            }
+            @case ('success') {
+              <div class="text-center py-10 animate-fade-in-down">
+                <div class="mx-auto bg-green-500/20 text-green-400 rounded-full h-16 w-16 flex items-center justify-center mb-4 transition-transform duration-500 transform hover:scale-110">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Obrigado!</h3>
+                <p class="text-gray-400 mt-2">Seu feedback foi enviado com sucesso.</p>
+                <div class="mt-6 bg-gray-800 inline-block px-4 py-2 rounded-md">
+                  <span class="text-sm text-gray-400">ID de Rastreamento: </span>
+                  <span class="font-mono text-white">{{ trackingId() }}</span>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        <div class="p-4 bg-gray-900/50 border-t border-gray-700">
+          @if (view() === 'form') {
+            @if (submissionError()) {
+              <div class="bg-red-500/20 text-red-400 text-sm rounded-md p-3 text-center mb-4 animate-fade-in-down">
+                {{ submissionError() }}
+              </div>
+            }
+            <button 
+              type="submit" 
+              (click)="submitFeedback()" 
+              [disabled]="!isFormValid() || isSubmitting()"
+              class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 ease-in-out disabled:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center">
+              @if (isSubmitting()) {
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Enviando...</span>
+              } @else {
+                <span>Enviar Feedback</span>
+              }
+            </button>
+          } @else {
+            <button 
+              (click)="resetForm()"
+              class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 ease-in-out">
+              Enviar Outro Feedback
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

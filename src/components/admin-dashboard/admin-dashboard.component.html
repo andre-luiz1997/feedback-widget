@@ -1,0 +1,400 @@
+@if (adminService.isOpen()) {
+  <div class="fixed inset-0 bg-gray-900 text-white z-[100] flex flex-col transition-opacity duration-500 font-poppins">
+    <div 
+      class="flex-grow flex h-full transition-all duration-300 ease-in-out" 
+      [class.opacity-100]="adminService.isOpen()"
+      [class.translate-y-0]="adminService.isOpen()"
+      [class.opacity-0]="!adminService.isOpen()"
+      [class.-translate-y-4]="!adminService.isOpen()">
+      
+      <!-- Sidebar -->
+      <aside class="w-64 bg-gray-800 p-6 flex-shrink-0 h-full flex flex-col">
+        <h1 class="text-2xl font-bold mb-8 text-white">Painel Admin</h1>
+        <nav class="space-y-2">
+          <a href="#" (click)="preventDefault($event); setView('dashboard')" class="flex items-center gap-3 px-3 py-2 rounded-md transition-colors"
+             [class.bg-blue-600]="adminService.currentView() === 'dashboard'"
+             [class.text-white]="adminService.currentView() === 'dashboard'"
+             [class.text-gray-300]="adminService.currentView() !== 'dashboard'"
+             [class.hover:bg-gray-700]="adminService.currentView() !== 'dashboard'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" (click)="preventDefault($event); setView('feedbacks')" class="flex items-center gap-3 px-3 py-2 rounded-md transition-colors"
+             [class.bg-blue-600]="adminService.currentView() === 'feedbacks'"
+             [class.text-white]="adminService.currentView() === 'feedbacks'"
+             [class.text-gray-300]="adminService.currentView() !== 'feedbacks'"
+             [class.hover:bg-gray-700]="adminService.currentView() !== 'feedbacks'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 3a1 1 0 00-1.447-.894L8.763 6H5a3 3 0 000 6h.28l1.771 5.316A1 1 0 008 18h1a1 1 0 001-1v-4.382l6.553 3.276A1 1 0 0018 15V3z" clip-rule="evenodd" /></svg>
+            <span>Feedbacks</span>
+          </a>
+          <a href="#" (click)="preventDefault($event); setView('settings')" class="flex items-center gap-3 px-3 py-2 rounded-md transition-colors"
+             [class.bg-blue-600]="adminService.currentView() === 'settings'"
+             [class.text-white]="adminService.currentView() === 'settings'"
+             [class.text-gray-300]="adminService.currentView() !== 'settings'"
+             [class.hover:bg-gray-700]="adminService.currentView() !== 'settings'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" /></svg>
+            <span>Configurações</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-8 overflow-y-auto bg-gray-900">
+        <header class="flex items-center justify-between mb-8">
+          @switch (adminService.currentView()) {
+            @case ('dashboard') { <h2 class="text-3xl font-bold">Dashboard</h2> }
+            @case ('feedbacks') { <h2 class="text-3xl font-bold">Lista de Feedbacks</h2> }
+            @case ('settings') { <h2 class="text-3xl font-bold">Configurações</h2> }
+          }
+          <button (click)="closeDashboard()" class="text-gray-400 hover:text-white transition-colors bg-gray-800 rounded-full p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="animate-fade-in-down">
+          @switch (adminService.currentView()) {
+            @case ('dashboard') {
+              <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Bem-vindo ao Painel Administrativo</h3>
+                <p class="text-gray-400">Utilize o menu à esquerda para navegar entre as seções.</p>
+                <p class="text-gray-400 mt-2">Aqui você poderá visualizar, filtrar e responder aos feedbacks enviados pelos usuários.</p>
+              </div>
+            }
+            @case ('feedbacks') {
+              <!-- Filter Bar -->
+              <div class="mb-6 p-4 bg-gray-800 rounded-lg flex items-center gap-4">
+                  <div class="flex-1">
+                      <label for="filterType" class="text-sm font-medium text-gray-400">Tipo</label>
+                      <select id="filterType" (change)="filterType.set($any($event.target).value)" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                          @for (option of typeOptions; track option.value) {
+                              <option [value]="option.value">{{ option.label }}</option>
+                          }
+                      </select>
+                  </div>
+                  <div class="flex-1">
+                      <label for="filterStatus" class="text-sm font-medium text-gray-400">Status</label>
+                      <select id="filterStatus" (change)="filterStatus.set($any($event.target).value)" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                           @for (option of statusOptions; track option.value) {
+                              <option [value]="option.value">{{ option.label }}</option>
+                          }
+                      </select>
+                  </div>
+                   <div class="flex-1">
+                      <label for="filterSeverity" class="text-sm font-medium text-gray-400">Severidade</label>
+                      <select id="filterSeverity" (change)="filterSeverity.set($any($event.target).value)" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                           @for (option of severityOptions; track option.value) {
+                              <option [value]="option.value">{{ option.label }}</option>
+                          }
+                      </select>
+                  </div>
+              </div>
+
+              <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                @if (isLoading()) {
+                  <div class="p-8 text-center text-gray-400">Carregando feedbacks...</div>
+                } @else if (error()) {
+                  <div class="p-8 text-center text-red-400">{{ error() }}</div>
+                } @else if (filteredFeedbacks().length === 0) {
+                  <div class="p-8 text-center text-gray-400">Nenhum feedback encontrado com os filtros atuais.</div>
+                } @else {
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                      <thead class="bg-gray-700/50">
+                        <tr>
+                          <th class="p-4">Data</th>
+                          <th class="p-4">Título</th>
+                          <th class="p-4">Tipo</th>
+                          <th class="p-4">Usuário</th>
+                          <th class="p-4">Status</th>
+                          <th class="p-4">Severidade</th>
+                          <th class="p-4">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (feedback of filteredFeedbacks(); track feedback.id) {
+                          <tr class="border-b border-gray-700 hover:bg-gray-700/30">
+                            <td class="p-4 text-gray-400 whitespace-nowrap">{{ feedback.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                            <td class="p-4 font-medium text-white max-w-xs truncate" [title]="feedback.title">{{ feedback.title }}</td>
+                            <td class="p-4 text-gray-300">{{ translateType(feedback.type) }}</td>
+                            <td class="p-4 text-gray-300">{{ feedback.name || feedback.email || 'Anônimo' }}</td>
+                            <td class="p-4">
+                              <span class="px-2 py-1 text-xs font-semibold rounded-full" [class]="getStatusClass(feedback.status)">
+                                {{ translateStatus(feedback.status) }}
+                              </span>
+                            </td>
+                            <td class="p-4">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full" [class]="getSeverityClass(feedback.severity)">
+                                    {{ translateSeverity(feedback.severity) }}
+                                </span>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-2">
+                                    <!-- View Button -->
+                                    <div class="relative group flex items-center">
+                                        <button (click)="viewFeedback(feedback)" class="w-8 h-8 flex items-center justify-center bg-blue-600/50 text-blue-300 hover:bg-blue-600 hover:text-white rounded-full transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C3.732 4.943 9.523 2 15 2c5.478 0 11.268 2.943 14.542 8-3.274 5.057-9.064 8-14.542 8-5.477 0-11.268-2.943-14.542-8zM15 10a5 5 0 11-10 0 5 5 0 0110 0z" clip-rule="evenodd" /></svg>
+                                        </button>
+                                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-950 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Visualizar</div>
+                                    </div>
+                                    <!-- Edit Button -->
+                                    <div class="relative group flex items-center">
+                                        <button (click)="openEditModal(feedback)" class="w-8 h-8 flex items-center justify-center bg-yellow-600/50 text-yellow-300 hover:bg-yellow-600 hover:text-white rounded-full transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
+                                        </button>
+                                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-950 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Editar</div>
+                                    </div>
+                                    <!-- Delete Button -->
+                                    <div class="relative group flex items-center">
+                                        <button (click)="openDeleteModal(feedback)" class="w-8 h-8 flex items-center justify-center bg-red-600/50 text-red-300 hover:bg-red-600 hover:text-white rounded-full transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                        </button>
+                                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-950 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Deletar</div>
+                                    </div>
+                                </div>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </div>
+            }
+            @case ('settings') {
+              <div class="space-y-10 max-w-3xl mx-auto">
+                <!-- Widget Appearance Settings -->
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                  <h3 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-3">Aparência do Widget</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                    <div>
+                      <label for="buttonColor" class="block text-sm font-medium text-gray-300 mb-2">Cor do Botão</label>
+                      <div class="flex items-center gap-3">
+                        <input #colorPicker type="color" id="buttonColor" [value]="localButtonColor()" (input)="localButtonColor.set(colorPicker.value)" class="w-10 h-10 p-1 bg-gray-700 border border-gray-600 rounded-md cursor-pointer">
+                        <input type="text" [value]="localButtonColor()" (input)="localButtonColor.set($any($event.target).value)" class="w-full bg-gray-700 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition font-mono">
+                      </div>
+                    </div>
+                    <div>
+                      <label for="buttonText" class="block text-sm font-medium text-gray-300 mb-2">Palavra de Destaque</label>
+                      <input type="text" id="buttonText" [value]="localButtonText()" (input)="localButtonText.set($any($event.target).value)" placeholder="Feedback" class="w-full bg-gray-700 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Database Settings -->
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                  <h3 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-3">Configuração do Banco de Dados</h3>
+                   <div class="space-y-4 pt-4">
+                      <div>
+                        <label for="dbUrl" class="block text-sm font-medium text-gray-300 mb-2">URL do Projeto</label>
+                        <input type="text" id="dbUrl" [value]="dbUrl()" (input)="dbUrl.set($any($event.target).value)" placeholder="https://xyz.supabase.co" class="w-full bg-gray-700 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
+                      </div>
+                      <div>
+                        <label for="dbApiKey" class="block text-sm font-medium text-gray-300 mb-2">API Key (Anon)</label>
+                        <input type="password" id="dbApiKey" [value]="dbApiKey()" (input)="dbApiKey.set($any($event.target).value)" placeholder="••••••••••••••••••••" class="w-full bg-gray-700 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
+                      </div>
+                   </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="flex justify-end items-center gap-4">
+                    @if(settingsMessage()){
+                        <span class="text-green-400 text-sm animate-fade-in-down">{{ settingsMessage() }}</span>
+                    }
+                    <button (click)="saveSettings()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors">
+                      Salvar Configurações
+                    </button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </main>
+    </div>
+  </div>
+}
+
+<!-- Feedback Detail Modal -->
+@if (selectedFeedback(); as feedback) {
+    <div class="fixed inset-0 bg-black bg-opacity-70 z-[101] flex items-center justify-center p-4 transition-opacity duration-300" (click)="closeFeedbackModal()">
+        <div class="relative bg-gray-800 text-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col transition-all duration-300 ease-in-out animate-fade-in-down" (click)="$event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="flex items-start justify-between p-5 border-b border-gray-700">
+                <div>
+                    <h3 class="text-xl font-semibold text-white">{{ feedback.title }}</h3>
+                    <p class="text-sm text-gray-400">
+                        Enviado por {{ feedback.name || feedback.email || 'Anônimo' }} em {{ feedback.created_at | date:'dd/MM/yyyy \'às\' HH:mm' }}
+                    </p>
+                </div>
+                <button (click)="closeFeedbackModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-6 overflow-y-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-gray-700/50 p-3 rounded-md">
+                        <div class="font-semibold text-gray-400">Tipo</div>
+                        <div class="text-white">{{ translateType(feedback.type) }}</div>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-md">
+                        <div class="font-semibold text-gray-400">Status</div>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full" [class]="getStatusClass(feedback.status)">
+                            {{ translateStatus(feedback.status) }}
+                        </span>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-md">
+                        <div class="font-semibold text-gray-400">Severidade</div>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full" [class]="getSeverityClass(feedback.severity)">
+                            {{ translateSeverity(feedback.severity) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold text-gray-300 mb-2">Descrição</h4>
+                    <p class="text-gray-400 bg-gray-900 p-4 rounded-md whitespace-pre-wrap">{{ feedback.description }}</p>
+                </div>
+
+                @if(feedback.current_route) {
+                    <div>
+                        <h4 class="font-semibold text-gray-300 mb-2">Contexto da Sessão</h4>
+                        <div class="bg-gray-900 p-4 rounded-md space-y-3">
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-400">Rota Atual</h5>
+                                <p class="font-mono bg-gray-700/50 inline-block px-2 py-1 rounded text-sm">{{ feedback.current_route }}</p>
+                            </div>
+                            @if(feedback.navigation_history && feedback.navigation_history.length > 0) {
+                                <div>
+                                    <h5 class="text-sm font-semibold text-gray-400 mb-1">Histórico de Navegação</h5>
+                                    <nav class="flex items-center space-x-2 text-sm text-gray-400" aria-label="Breadcrumb">
+                                        @for(route of feedback.navigation_history; track $index; let isLast = $last) {
+                                            <div class="flex items-center">
+                                                <span class="font-mono" [class.text-white]="isLast">{{ route }}</span>
+                                                @if(!isLast) {
+                                                    <svg class="flex-shrink-0 h-5 w-5 text-gray-500 mx-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                                    </svg>
+                                                }
+                                            </div>
+                                        }
+                                    </nav>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div>
+                    <h4 class="font-semibold text-gray-300 mb-2">Anexos</h4>
+                    @if (isFetchingAttachments()) {
+                        <div class="text-gray-400 text-sm">Carregando anexos...</div>
+                    } @else if (attachmentUrls().length > 0) {
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-2">
+                            @for (att of attachmentUrls(); track att.name) {
+                                <a [href]="att.url" target="_blank" rel="noopener noreferrer" class="group relative block bg-gray-900 rounded-lg overflow-hidden">
+                                    @if (att.isImage) {
+                                        <img [src]="att.url" [alt]="att.name" class="w-full h-24 object-cover group-hover:opacity-75 transition-opacity" />
+                                        <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        </div>
+                                    } @else {
+                                        <div class="w-full h-24 flex flex-col items-center justify-center text-center p-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                                            <span class="text-xs text-gray-400 mt-1 truncate w-full" [title]="att.name">{{ att.name }}</span>
+                                        </div>
+                                    }
+                                </a>
+                            }
+                        </div>
+                    } @else if (feedback.attachment_names && feedback.attachment_names.length > 0) {
+                        <div class="text-gray-500 text-sm">Não foi possível carregar os anexos.</div>
+                    } @else {
+                        <div class="text-gray-500 text-sm">Nenhum anexo fornecido.</div>
+                    }
+                </div>
+            </div>
+             <div class="flex items-center p-4 border-t border-gray-700 rounded-b">
+                <button (click)="closeFeedbackModal()" type="button" class="w-full bg-gray-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-gray-700 transition-colors">Fechar</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Edit Feedback Modal -->
+@if (feedbackToEdit(); as feedback) {
+    <div class="fixed inset-0 bg-black bg-opacity-70 z-[102] flex items-center justify-center p-4" (click)="closeEditModal()">
+        <div class="relative bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg transition-all duration-300 ease-in-out animate-fade-in-down" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between p-5 border-b border-gray-700">
+                <h3 class="text-xl font-semibold">Editar Feedback</h3>
+                <button (click)="closeEditModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-gray-400">ID de Rastreamento: <span class="font-mono text-white">{{ feedback.tracking_id }}</span></p>
+                <div>
+                    <label for="editStatus" class="block text-sm font-medium text-gray-300 mb-1">Status</label>
+                    <select id="editStatus" [value]="editStatus()" (change)="editStatus.set($any($event.target).value)" class="w-full bg-gray-700 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
+                        @for(option of statusOptions; track option.value) {
+                            @if(option.value !== 'all') { <option [value]="option.value">{{ option.label }}</option> }
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="editSeverity" class="block text-sm font-medium text-gray-300 mb-1">Severidade</label>
+                    <select id="editSeverity" [value]="editSeverity()" (change)="editSeverity.set($any($event.target).value)" class="w-full bg-gray-700 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
+                        @for(option of severityOptions; track option.value) {
+                             @if(option.value !== 'all') { <option [value]="option.value">{{ option.label }}</option> }
+                        }
+                    </select>
+                </div>
+                 @if (editError()) {
+                    <div class="bg-red-500/20 text-red-400 text-sm rounded-md p-3 text-center animate-fade-in-down">{{ editError() }}</div>
+                }
+            </div>
+            <div class="flex items-center justify-end p-4 border-t border-gray-700 gap-3">
+                <button (click)="closeEditModal()" type="button" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-700 transition-colors">Cancelar</button>
+                <button (click)="updateFeedback()" [disabled]="isSaving()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center">
+                    @if (isSaving()) {
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span>Salvando...</span>
+                    } @else {
+                        <span>Salvar Alterações</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (feedbackToDelete(); as feedback) {
+    <div class="fixed inset-0 bg-black bg-opacity-70 z-[103] flex items-center justify-center p-4" (click)="closeDeleteModal()">
+        <div class="relative bg-gray-800 rounded-lg shadow-2xl w-full max-w-md transition-all duration-300 ease-in-out animate-fade-in-down" (click)="$event.stopPropagation()">
+            <div class="p-6 text-center">
+                <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Deletar Feedback</h3>
+                <p class="mt-2 text-sm text-gray-400">Tem certeza que deseja deletar este feedback? Esta ação não pode ser desfeita.</p>
+                @if (deleteError()) {
+                    <div class="bg-red-500/20 text-red-400 text-sm rounded-md p-3 text-center mt-4 animate-fade-in-down">{{ deleteError() }}</div>
+                }
+            </div>
+            <div class="flex items-center justify-center p-4 border-t border-gray-700 gap-3">
+                <button (click)="closeDeleteModal()" type="button" class="flex-1 bg-gray-600 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-700 transition-colors">Cancelar</button>
+                <button (click)="deleteFeedback()" [disabled]="isDeleting()" class="flex-1 bg-red-600 text-white font-bold py-2 px-4 rounded-md hover:bg-red-700 transition-colors disabled:bg-red-400 disabled:cursor-not-allowed flex items-center justify-center">
+                    @if(isDeleting()){
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span>Deletando...</span>
+                    } @else {
+                        <span>Sim, Deletar</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}

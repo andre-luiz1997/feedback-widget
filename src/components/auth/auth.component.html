@@ -1,0 +1,69 @@
+
+<div class="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg animate-fade-in-down">
+  <div>
+    <h2 class="text-3xl font-extrabold text-center text-gray-900 dark:text-white">
+      {{ isLoginView() ? 'Acessar sua conta' : 'Criar uma nova conta' }}
+    </h2>
+    <p class="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
+      Ou 
+      <a href="#" (click)="$event.preventDefault(); toggleView()" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-500">
+        {{ isLoginView() ? 'crie uma conta' : 'acesse sua conta' }}
+      </a>
+    </p>
+  </div>
+
+  <form class="space-y-6" (submit)="handleSubmit($event)">
+    <div class="rounded-md shadow-sm -space-y-px">
+      <div>
+        <label for="email-address" class="sr-only">Email</label>
+        <input id="email-address" name="email" type="email" autocomplete="email" required 
+               [(ngModel)]="email"
+               class="relative block w-full px-3 py-3 text-gray-900 placeholder-gray-500 bg-gray-50 border border-gray-300 rounded-t-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
+               placeholder="Endereço de e-mail">
+      </div>
+      <div>
+        <label for="password" class="sr-only">Senha</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required 
+               [(ngModel)]="password"
+               class="relative block w-full px-3 py-3 text-gray-900 placeholder-gray-500 bg-gray-50 border border-gray-300 rounded-b-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
+               placeholder="Senha">
+      </div>
+    </div>
+
+    @if (!isLoginView()) {
+      <div class="animate-fade-in-down">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de conta</label>
+        <div class="mt-2 flex items-center space-x-4">
+          <div class="flex items-center">
+            <input id="role-client" name="role" type="radio" value="client" [(ngModel)]="role" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <label for="role-client" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Cliente</label>
+          </div>
+          <div class="flex items-center">
+            <input id="role-admin" name="role" type="radio" value="admin" [(ngModel)]="role" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <label for="role-admin" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Admin</label>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="bg-red-500/10 text-red-500 dark:text-red-400 text-sm rounded-md p-3 text-center animate-fade-in-down">
+        {{ error() }}
+      </div>
+    }
+
+    <div>
+      <button type="submit" [disabled]="loading()" class="group relative flex justify-center w-full px-4 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed">
+        @if (loading()) {
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Processando...</span>
+        } @else {
+          <span>{{ isLoginView() ? 'Entrar' : 'Cadastrar' }}</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>
