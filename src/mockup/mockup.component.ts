@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { FeedbackWidgetComponent } from '../components/feedback-widget/feedback-widget.component';
 import { DashboardComponent } from '../admin/components/dashboard/dashboard.component';
 import { AuthComponent } from './components/auth/auth.component';
@@ -6,6 +6,7 @@ import { FeedbackService } from '../services/feedback.service';
 import { AdminService } from '../admin/admin.service';
 import { AuthService } from './auth.service';
 import { NavigationTrackingService, View } from './navigation-tracking.service';
+import { AppFlow } from '../services/flow.service';
 
 @Component({
   selector: 'app-mockup',
@@ -18,6 +19,8 @@ export class MockupComponent {
   adminService = inject(AdminService);
   authService = inject(AuthService);
   navigationTracker = inject(NavigationTrackingService); 
+
+  flow = input.required<AppFlow>();
 
   currentView = this.navigationTracker.currentRoute;
 

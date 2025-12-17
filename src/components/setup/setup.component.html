@@ -1,0 +1,53 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
+    <div class="w-full max-w-lg p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-2xl animate-fade-in-down">
+        <div>
+            <h2 class="text-3xl font-extrabold text-center text-gray-900 dark:text-white">Configurar Conexão</h2>
+            <p class="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
+                O widget requer credenciais do Supabase para funcionar.
+                @if (flow() === 'admin') {
+                    <span>Insira as credenciais para acessar o Painel Admin.</span>
+                } @else {
+                    <span>Insira as credenciais para visualizar a aplicação com o widget.</span>
+                }
+            </p>
+        </div>
+        <form class="space-y-6" (submit)="connectToSupabase($event)">
+            <div>
+                <label for="setup-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">URL do Projeto Supabase</label>
+                <input id="setup-url" name="setup-url" type="url" required 
+                        [(ngModel)]="setupUrl"
+                        class="relative block w-full px-3 py-3 text-gray-900 placeholder-gray-500 bg-gray-50 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+                        placeholder="https://exemplo.supabase.co">
+            </div>
+            <div>
+                <label for="setup-key" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chave Pública (Anon / Publishable)</label>
+                <input id="setup-key" name="setup-key" type="password" required 
+                        [(ngModel)]="setupKey"
+                        class="relative block w-full px-3 py-3 text-gray-900 placeholder-gray-500 bg-gray-50 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+                        placeholder="••••••••••••••••••••">
+                 <p class="mt-2 text-xs text-gray-500">Você pode encontrar isso nas configurações de API do seu projeto Supabase.</p>
+            </div>
+                @if (setupError()) {
+                <div class="bg-red-500/10 text-red-500 dark:text-red-400 text-sm rounded-md p-3 text-center animate-fade-in-down">
+                    {{ setupError() }}
+                </div>
+                }
+            <div class="flex items-center justify-between gap-4 pt-2">
+                <button type="button" (click)="goBack()" class="w-full bg-gray-200 text-gray-800 font-bold py-2.5 px-4 rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-700 transition-colors">Voltar</button>
+                <button type="submit" 
+                        [disabled]="isConnecting()"
+                        class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center disabled:bg-blue-400 disabled:cursor-not-allowed">
+                    @if (isConnecting()) {
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Conectando...</span>
+                    } @else {
+                        <span>Conectar e Continuar</span>
+                    }
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

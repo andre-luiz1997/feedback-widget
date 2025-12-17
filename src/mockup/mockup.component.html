@@ -1,4 +1,4 @@
-@if (authService.session(); as session) {
+@if (flow() === 'widget' || authService.session()) {
   <div class="relative min-h-screen bg-gray-100 dark:bg-gray-800">
     <header class="bg-white dark:bg-gray-900 shadow-md p-4 flex justify-between items-center w-full z-10">
       <div class="flex items-center gap-6">
@@ -40,12 +40,16 @@
          </nav>
       </div>
       <div class="flex items-center gap-4">
-        <span class="text-sm text-gray-700 dark:text-gray-300 hidden sm:block">Bem-vindo, {{ session.user.email }}</span>
-        <button 
-          (click)="signOut()"
-          class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors">
-          Logout
-        </button>
+        @if (authService.session(); as session) {
+          <span class="text-sm text-gray-700 dark:text-gray-300 hidden sm:block">Bem-vindo, {{ session.user.email }}</span>
+          <button 
+            (click)="signOut()"
+            class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-colors">
+            Logout
+          </button>
+        } @else {
+          <span class="text-sm text-gray-700 dark:text-gray-300 hidden sm:block">Bem-vindo, Visitante</span>
+        }
       </div>
     </header>
 
@@ -72,8 +76,8 @@
                  <div class="animate-fade-in-down">
                     <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4">Perfil do Usuário</h1>
                     <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md max-w-lg">
-                        <p class="text-lg text-gray-600 dark:text-gray-300"><strong>Email:</strong> {{ session.user.email }}</p>
-                        <p class="text-lg text-gray-600 dark:text-gray-300 mt-2"><strong>ID do Usuário:</strong> {{ session.user.id }}</p>
+                        <p class="text-lg text-gray-600 dark:text-gray-300"><strong>Email:</strong> {{ authService.session()?.user.email ?? 'Não autenticado' }}</p>
+                        <p class="text-lg text-gray-600 dark:text-gray-300 mt-2"><strong>ID do Usuário:</strong> {{ authService.session()?.user.id ?? 'Não autenticado' }}</p>
                     </div>
                 </div>
             }
@@ -88,7 +92,7 @@
         }
     </main>
     
-    @if (authService.isAdmin()) {
+    @if (flow() === 'admin' && authService.isAdmin()) {
       <button 
         (click)="openAdminDashboard()"
         class="fixed top-24 left-5 bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 ease-in-out flex items-center space-x-2 z-40">
@@ -100,16 +104,18 @@
       </button>
     }
     
-    <button 
-      (click)="openFeedbackWidget()"
-      [class.animate-shake]="feedbackService.isTriggered()"
-      [style.background-color]="adminService.buttonColor()"
-      class="group fixed bottom-5 right-5 text-white font-bold rounded-full shadow-lg hover:brightness-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 ease-in-out flex items-center h-14 p-4 z-40">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-        <span class="whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2">{{ adminService.buttonText() }}</span>
-    </button>
+    @if (flow() === 'widget') {
+      <button 
+        (click)="openFeedbackWidget()"
+        [class.animate-shake]="feedbackService.isTriggered()"
+        [style.background-color]="adminService.buttonColor()"
+        class="group fixed bottom-5 right-5 text-white font-bold rounded-full shadow-lg hover:brightness-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 ease-in-out flex items-center h-14 p-4 z-40">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          <span class="whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-2">{{ adminService.buttonText() }}</span>
+      </button>
+    }
 
     <app-feedback-widget></app-feedback-widget>
     <app-dashboard></app-dashboard>

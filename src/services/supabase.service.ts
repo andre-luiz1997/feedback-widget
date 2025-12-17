@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
-import { supabase } from '../supabase/client';
+import { Injectable, inject } from '@angular/core';
 import { Feedback, FeedbackRecord, FeedbackStatus, FeedbackSeverity } from '../models/feedback.model';
+import { ConfigService } from './config.service';
+import { SupabaseProvider } from '../supabase/provider';
 
 type FeedbackPayload = Omit<Feedback, 'attachments'> & {
     attachment_names?: string[];
@@ -11,11 +12,22 @@ type FeedbackPayload = Omit<Feedback, 'attachments'> & {
   providedIn: 'root'
 })
 export class SupabaseService {
+  private configService = inject(ConfigService);
+  private supabaseProvider = inject(SupabaseProvider);
+
+  private generateNotConfiguredError() {
+    return new Error('O Supabase não está configurado. Por favor, inicialize o widget com as credenciais do banco de dados.');
+  }
 
   async addFeedback(feedback: FeedbackPayload): Promise<{ trackingId: string; error: Error | null }> {
+    const client = this.supabaseProvider.client();
+    if (!this.configService.isConfigured() || !client) {
+      return { trackingId: '', error: this.generateNotConfiguredError() };
+    }
+
     const trackingId = `FB-${Date.now()}`;
     
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('feedbacks')
       .insert([
         { 
@@ -55,7 +67,12 @@ export class SupabaseService {
   }
 
   async getFeedbacks(): Promise<{ feedbacks: FeedbackRecord[]; error: Error | null }> {
-    const { data, error } = await supabase
+    const client = this.supabaseProvider.client();
+    if (!this.configService.isConfigured() || !client) {
+      return { feedbacks: [], error: this.generateNotConfiguredError() };
+    }
+
+    const { data, error } = await client
       .from('feedbacks')
       .select('*')
       .order('created_at', { ascending: false });
@@ -69,8 +86,13 @@ export class SupabaseService {
   }
   
   async uploadAttachments(files: File[], trackingId: string): Promise<{ error: Error | null }> {
+    const client = this.supabaseProvider.client();
+    if (!this.configService.isConfigured() || !client) {
+      return { error: this.generateNotConfiguredError() };
+    }
+
     const uploadPromises = files.map(file => 
-      supabase.storage.from('test').upload(`public/${trackingId}/${file.name}`, file)
+      client.storage.from('test').upload(`public/${trackingId}/${file.name}`, file)
     );
 
     const results = await Promise.all(uploadPromises);
@@ -85,15 +107,26 @@ export class SupabaseService {
   }
 
   async getAttachmentUrls(trackingId: string, attachmentNames: string[]): Promise<{ name: string; url: string }[]> {
+    const client = this.supabaseProvider.client();
+    if (!this.configService.isConfigured() || !client) {
+      console.error(this.generateNotConfiguredError().message);
+      return [];
+    }
+
     const urls = attachmentNames.map(name => {
-      const { data } = supabase.storage.from('test').getPublicUrl(`public/${trackingId}/${name}`);
+      const { data } = client.storage.from('test').getPublicUrl(`public/${trackingId}/${name}`);
       return { name, url: data.publicUrl };
     });
     return urls;
   }
 
   async updateFeedback(id: number, updates: { status?: FeedbackStatus; severity?: FeedbackSeverity }): Promise<{ error: Error | null }> {
-    const { error } = await supabase
+    const client = this.supabaseProvider.client();
+    if (!this.configService.isConfigured() || !client) {
+      return { error: this.generateNotConfiguredError() };
+    }
+
+    const { error } = await client
       .from('feedbacks')
       .update(updates)
       .eq('id', id);
@@ -107,7 +140,12 @@ export class SupabaseService {
   }
 
   async deleteFeedback(id: number): Promise<{ error: Error | null }> {
-    const { error } = await supabase
+    const client = this.supabaseProvider.client();
+    if (!this.configService.isConfigured() || !client) {
+      return { error: this.generateNotConfiguredError() };
+    }
+    
+    const { error } = await client
       .from('feedbacks')
       .delete()
       .eq('id', id);

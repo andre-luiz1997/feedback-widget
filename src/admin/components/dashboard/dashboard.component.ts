@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AdminService, AdminView } from '../../admin.service';
 import { SupabaseService } from '../../../services/supabase.service';
 import { FeedbackRecord, FeedbackSeverity, FeedbackStatus, FeedbackType } from '../../../models/feedback.model';
@@ -8,7 +9,7 @@ import { FeedbackRecord, FeedbackSeverity, FeedbackStatus, FeedbackType } from '
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, DatePipe]
+  imports: [CommonModule, DatePipe, FormsModule]
 })
 export class DashboardComponent {
   adminService = inject(AdminService);
@@ -35,7 +36,7 @@ export class DashboardComponent {
   // Delete modal state
   isDeleting = signal(false);
   deleteError = signal<string | null>(null);
-
+  
   // Settings page state
   localButtonColor = signal(this.adminService.buttonColor());
   localButtonText = signal(this.adminService.buttonText());
@@ -48,43 +49,21 @@ export class DashboardComponent {
   filterStatus = signal<'all' | FeedbackStatus>('all');
   filterSeverity = signal<'all' | FeedbackSeverity>('all');
   
-  // Filter options for template
   typeOptions = [
-    { value: 'all', label: 'Todos os Tipos' },
-    { value: 'bug_report', label: 'Relato de Bug' },
-    { value: 'feature_request', label: 'Sugestão' },
-    { value: 'satisfaction', label: 'Satisfação' },
-    { value: 'other', label: 'Outro' }
+    { value: 'all', label: 'Todos os Tipos' }, { value: 'bug_report', label: 'Relato de Bug' }, { value: 'feature_request', label: 'Sugestão' }, { value: 'satisfaction', label: 'Satisfação' }, { value: 'other', label: 'Outro' }
   ];
   statusOptions = [
-    { value: 'all', label: 'Todos os Status' },
-    { value: 'new', label: 'Novo' },
-    { value: 'acknowledged', label: 'Confirmado' },
-    { value: 'in_review', label: 'Em Análise' },
-    { value: 'in_progress', label: 'Em Progresso' },
-    { value: 'resolved', label: 'Resolvido' },
-    { value: 'wont_fix', label: 'Não Será Corrigido' },
-    { value: 'duplicate', label: 'Duplicado' }
+    { value: 'all', label: 'Todos os Status' }, { value: 'new', label: 'Novo' }, { value: 'acknowledged', label: 'Confirmado' }, { value: 'in_review', label: 'Em Análise' }, { value: 'in_progress', label: 'Em Progresso' }, { value: 'resolved', label: 'Resolvido' }, { value: 'wont_fix', label: 'Não Será Corrigido' }, { value: 'duplicate', label: 'Duplicado' }
   ];
   severityOptions = [
-    { value: 'all', label: 'Toda Severidade' },
-    { value: 'low', label: 'Baixa' },
-    { value: 'medium', label: 'Média' },
-    { value: 'high', label: 'Alta' },
-    { value: 'critical', label: 'Crítica' }
+    { value: 'all', label: 'Toda Severidade' }, { value: 'low', label: 'Baixa' }, { value: 'medium', label: 'Média' }, { value: 'high', label: 'Alta' }, { value: 'critical', label: 'Crítica' }
   ];
 
   filteredFeedbacks = computed(() => {
-    const allFeedbacks = this.feedbacks();
-    const type = this.filterType();
-    const status = this.filterStatus();
-    const severity = this.filterSeverity();
-
-    if (type === 'all' && status === 'all' && severity === 'all') {
-      return allFeedbacks;
-    }
-
-    return allFeedbacks.filter(fb => {
+    return this.feedbacks().filter(fb => {
+      const type = this.filterType();
+      const status = this.filterStatus();
+      const severity = this.filterSeverity();
       const typeMatch = type === 'all' || fb.type === type;
       const statusMatch = status === 'all' || fb.status === status;
       const severityMatch = severity === 'all' || fb.severity === severity;
@@ -105,7 +84,7 @@ export class DashboardComponent {
       }
     });
   }
-
+  
   loadSettings(): void {
     if (typeof window !== 'undefined') {
         this.dbUrl.set(localStorage.getItem('supabaseUrl') || '');
@@ -121,7 +100,7 @@ export class DashboardComponent {
       if (error) throw error;
       this.feedbacks.set(feedbacks);
     } catch (e) {
-      this.error.set('Falha ao carregar os feedbacks. Por favor, tente novamente.');
+      this.error.set('Falha ao carregar os feedbacks. Verifique se as credenciais do Supabase estão corretas e se o RLS está configurado.');
       console.error(e);
     } finally {
       this.isLoading.set(false);
@@ -136,11 +115,9 @@ export class DashboardComponent {
     this.adminService.setView(view);
   }
 
-  // --- View Modal ---
   async viewFeedback(feedback: FeedbackRecord): Promise<void> {
     this.selectedFeedback.set(feedback);
     this.attachmentUrls.set([]);
-
     if (feedback.attachment_names && feedback.attachment_names.length > 0) {
       this.isFetchingAttachments.set(true);
       try {
@@ -154,7 +131,6 @@ export class DashboardComponent {
     }
   }
 
-  // --- Edit Modal ---
   openEditModal(feedback: FeedbackRecord): void {
     this.feedbackToEdit.set(feedback);
     this.editStatus.set(feedback.status);
@@ -165,32 +141,19 @@ export class DashboardComponent {
   async updateFeedback(): Promise<void> {
     const feedback = this.feedbackToEdit();
     if (!feedback) return;
-
     this.isSaving.set(true);
     this.editError.set(null);
-
-    const updates = {
-      status: this.editStatus(),
-      severity: this.editSeverity()
-    };
-
+    const updates = { status: this.editStatus(), severity: this.editSeverity() };
     const { error } = await this.supabaseService.updateFeedback(feedback.id, updates);
-
     if (error) {
       this.editError.set(`Falha ao atualizar: ${error.message}`);
     } else {
-      // Update local state for immediate UI feedback
-      this.feedbacks.update(currentFeedbacks => 
-        currentFeedbacks.map(fb => 
-          fb.id === feedback.id ? { ...fb, ...updates } : fb
-        )
-      );
+      this.feedbacks.update(current => current.map(fb => fb.id === feedback.id ? { ...fb, ...updates } : fb));
       this.closeEditModal();
     }
     this.isSaving.set(false);
   }
 
-  // --- Delete Modal ---
   openDeleteModal(feedback: FeedbackRecord): void {
     this.feedbackToDelete.set(feedback);
     this.deleteError.set(null);
@@ -199,43 +162,32 @@ export class DashboardComponent {
   async deleteFeedback(): Promise<void> {
     const feedback = this.feedbackToDelete();
     if (!feedback) return;
-
     this.isDeleting.set(true);
     this.deleteError.set(null);
-
     const { error } = await this.supabaseService.deleteFeedback(feedback.id);
-
     if (error) {
       this.deleteError.set(`Falha ao deletar: ${error.message}`);
     } else {
-      // Update local state
-      this.feedbacks.update(currentFeedbacks =>
-        currentFeedbacks.filter(fb => fb.id !== feedback.id)
-      );
+      this.feedbacks.update(current => current.filter(fb => fb.id !== feedback.id));
       this.closeDeleteModal();
     }
     this.isDeleting.set(false);
   }
   
-  // --- Settings ---
   saveSettings(): void {
     this.adminService.buttonColor.set(this.localButtonColor());
     this.adminService.buttonText.set(this.localButtonText());
-
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('supabaseUrl', this.dbUrl());
-        localStorage.setItem('supabaseApiKey', this.dbApiKey());
+    if (this.dbUrl() && this.dbApiKey()) {
+        // Since this component is only loaded when configured, this logic is for *updating* credentials.
+        const configService = new (window as any).FeedbackWidget.ConfigService();
+        configService.saveCredentials(this.dbUrl(), this.dbApiKey());
+        this.settingsMessage.set('Configurações salvas! A página será recarregada.');
+    } else {
+        this.settingsMessage.set('Configurações de aparência salvas.');
+         setTimeout(() => this.settingsMessage.set(''), 2000);
     }
-
-    this.settingsMessage.set('Configurações salvas! A página será recarregada.');
-    setTimeout(() => {
-        if (typeof window !== 'undefined') {
-            location.reload();
-        }
-    }, 2000);
   }
 
-  // --- Modal Closing ---
   private closeAllModals(): void {
     this.selectedFeedback.set(null);
     this.feedbackToEdit.set(null);
@@ -250,18 +202,12 @@ export class DashboardComponent {
     return /\.(jpe?g|png|gif|webp)$/i.test(fileName);
   }
 
-  // Translation and styling methods
-  translateType(type: FeedbackType): string {
-    return this.typeOptions.find(o => o.value === type)?.label ?? type;
-  }
-  translateStatus(status: FeedbackStatus): string {
-    return this.statusOptions.find(o => o.value === status)?.label ?? status;
-  }
+  translateType(type: FeedbackType): string { return this.typeOptions.find(o => o.value === type)?.label ?? type; }
+  translateStatus(status: FeedbackStatus): string { return this.statusOptions.find(o => o.value === status)?.label ?? status; }
   translateSeverity(severity?: FeedbackSeverity): string {
     if (!severity) return '-';
     return this.severityOptions.find(o => o.value === severity)?.label ?? severity;
   }
-
   getStatusClass(status: FeedbackStatus): string {
     switch (status) {
       case 'new': return 'bg-blue-500/20 text-blue-300';
@@ -270,7 +216,6 @@ export class DashboardComponent {
       default: return 'bg-gray-500/20 text-gray-300';
     }
   }
-  
   getSeverityClass(severity?: FeedbackSeverity): string {
     switch (severity) {
       case 'low': return 'bg-gray-500/20 text-gray-300';
@@ -280,7 +225,6 @@ export class DashboardComponent {
       default: return 'hidden';
     }
   }
-
   preventDefault(event: Event) {
     event.stopPropagation();
     event.preventDefault();

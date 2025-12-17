@@ -12,26 +12,26 @@
         <h1 class="text-2xl font-bold mb-8 text-white">Painel Admin</h1>
         <nav class="space-y-2">
           <a href="#" (click)="preventDefault($event); setView('dashboard')" class="flex items-center gap-3 px-3 py-2 rounded-md transition-colors"
-             [class.bg-blue-600]="adminService.currentView() === 'dashboard'"
-             [class.text-white]="adminService.currentView() === 'dashboard'"
-             [class.text-gray-300]="adminService.currentView() !== 'dashboard'"
-             [class.hover:bg-gray-700]="adminService.currentView() !== 'dashboard'">
+            [class.bg-blue-600]="adminService.currentView() === 'dashboard'"
+            [class.text-white]="adminService.currentView() === 'dashboard'"
+            [class.text-gray-300]="adminService.currentView() !== 'dashboard'"
+            [class.hover:bg-gray-700]="adminService.currentView() !== 'dashboard'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
             <span>Dashboard</span>
           </a>
           <a href="#" (click)="preventDefault($event); setView('feedbacks')" class="flex items-center gap-3 px-3 py-2 rounded-md transition-colors"
-             [class.bg-blue-600]="adminService.currentView() === 'feedbacks'"
-             [class.text-white]="adminService.currentView() === 'feedbacks'"
-             [class.text-gray-300]="adminService.currentView() !== 'feedbacks'"
-             [class.hover:bg-gray-700]="adminService.currentView() !== 'feedbacks'">
+            [class.bg-blue-600]="adminService.currentView() === 'feedbacks'"
+            [class.text-white]="adminService.currentView() === 'feedbacks'"
+            [class.text-gray-300]="adminService.currentView() !== 'feedbacks'"
+            [class.hover:bg-gray-700]="adminService.currentView() !== 'feedbacks'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 3a1 1 0 00-1.447-.894L8.763 6H5a3 3 0 000 6h.28l1.771 5.316A1 1 0 008 18h1a1 1 0 001-1v-4.382l6.553 3.276A1 1 0 0018 15V3z" clip-rule="evenodd" /></svg>
             <span>Feedbacks</span>
           </a>
           <a href="#" (click)="preventDefault($event); setView('settings')" class="flex items-center gap-3 px-3 py-2 rounded-md transition-colors"
-             [class.bg-blue-600]="adminService.currentView() === 'settings'"
-             [class.text-white]="adminService.currentView() === 'settings'"
-             [class.text-gray-300]="adminService.currentView() !== 'settings'"
-             [class.hover:bg-gray-700]="adminService.currentView() !== 'settings'">
+            [class.bg-blue-600]="adminService.currentView() === 'settings'"
+            [class.text-white]="adminService.currentView() === 'settings'"
+            [class.text-gray-300]="adminService.currentView() !== 'settings'"
+            [class.hover:bg-gray-700]="adminService.currentView() !== 'settings'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" /></svg>
             <span>Configurações</span>
           </a>
@@ -76,15 +76,15 @@
                   <div class="flex-1">
                       <label for="filterStatus" class="text-sm font-medium text-gray-400">Status</label>
                       <select id="filterStatus" (change)="filterStatus.set($any($event.target).value)" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                           @for (option of statusOptions; track option.value) {
+                          @for (option of statusOptions; track option.value) {
                               <option [value]="option.value">{{ option.label }}</option>
                           }
                       </select>
                   </div>
-                   <div class="flex-1">
+                  <div class="flex-1">
                       <label for="filterSeverity" class="text-sm font-medium text-gray-400">Severidade</label>
                       <select id="filterSeverity" (change)="filterSeverity.set($any($event.target).value)" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                           @for (option of severityOptions; track option.value) {
+                          @for (option of severityOptions; track option.value) {
                               <option [value]="option.value">{{ option.label }}</option>
                           }
                       </select>
@@ -185,7 +185,7 @@
                 <!-- Database Settings -->
                 <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
                   <h3 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-3">Configuração do Supabase</h3>
-                   <div class="space-y-4 pt-4">
+                  <div class="space-y-4 pt-4">
                       <div>
                         <label for="dbUrl" class="block text-sm font-medium text-gray-300 mb-2">URL do Projeto</label>
                         <input type="text" id="dbUrl" [value]="dbUrl()" (input)="dbUrl.set($any($event.target).value)" placeholder="https://xyz.supabase.co" class="w-full bg-gray-700 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
@@ -194,7 +194,7 @@
                         <label for="dbApiKey" class="block text-sm font-medium text-gray-300 mb-2">Chave Publicada (Anon)</label>
                         <input type="password" id="dbApiKey" [value]="dbApiKey()" (input)="dbApiKey.set($any($event.target).value)" placeholder="••••••••••••••••••••" class="w-full bg-gray-700 border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 transition">
                       </div>
-                   </div>
+                  </div>
                 </div>
 
                 <!-- Save Button -->

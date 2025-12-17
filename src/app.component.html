@@ -1,1 +1,9 @@
-<app-mockup></app-mockup>
+@if (flowService.currentFlow(); as flow) {
+  @if (configService.isConfigured()) {
+    <app-mockup [flow]="flow"></app-mockup>
+  } @else {
+    <app-setup [flow]="flow"></app-setup>
+  }
+} @else {
+  <app-flow-selector></app-flow-selector>
+}
