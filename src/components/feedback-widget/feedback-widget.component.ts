@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FeedbackService } from '../../services/feedback.service';
 import { SupabaseService } from '../../services/supabase.service';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../mockup/auth.service';
 import { FeedbackType, FeedbackSeverity } from '../../models/feedback.model';
-import { NavigationTrackingService } from '../../services/navigation-tracking.service';
+import { NavigationTrackingService } from '../../mockup/navigation-tracking.service';
+import { AdminService } from '../../admin/admin.service';
 
 // Declaração de variáveis globais para as bibliotecas carregadas via CDN
 declare var html2canvas: any;
@@ -22,6 +23,7 @@ export class FeedbackWidgetComponent {
   supabaseService = inject(SupabaseService);
   authService = inject(AuthService);
   navigationService = inject(NavigationTrackingService);
+  adminService = inject(AdminService);
   
   view = signal<'form' | 'success'>('form');
   isSubmitting = signal(false);

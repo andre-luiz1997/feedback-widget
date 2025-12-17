@@ -30,7 +30,7 @@
 
         <div class="p-4 bg-gray-900/50 border-t border-gray-700 flex items-center gap-4">
           <button (click)="cancelCrop()" class="w-full bg-gray-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-gray-700 transition-colors">Cancelar</button>
-          <button (click)="confirmCrop()" class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-blue-700 transition-colors">Confirmar e Anexar</button>
+          <button (click)="confirmCrop()" [style.background-color]="adminService.buttonColor()" class="w-full text-white font-bold py-2.5 px-4 rounded-md hover:brightness-90 transition-all">Confirmar e Anexar</button>
         </div>
       } @else {
         <!-- FORM VIEW -->
@@ -56,7 +56,7 @@
                         type="button" 
                         (click)="type.set(feedbackType.value)"
                         class="px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200"
-                        [class.bg-blue-600]="type() === feedbackType.value"
+                        [style.background-color]="type() === feedbackType.value ? adminService.buttonColor() : null"
                         [class.text-white]="type() === feedbackType.value"
                         [class.bg-gray-700]="type() !== feedbackType.value"
                         [class.hover:bg-gray-600]="type() !== feedbackType.value">
@@ -138,12 +138,12 @@
                     (dragleave)="onDragLeave($event)" 
                     (drop)="onDrop($event)"
                     class="relative border-2 border-dashed border-gray-600 rounded-lg p-6 text-center transition-colors"
-                    [class.border-blue-500]="isDragging()"
+                    [style.border-color]="isDragging() ? adminService.buttonColor() : null"
                     [class.bg-gray-800]="isDragging()">
                     <input type="file" multiple (change)="onFileSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" id="file-upload">
                     <svg class="mx-auto h-12 w-12 text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     <p class="mt-2 text-sm text-gray-400">
-                      <label for="file-upload" class="font-medium text-blue-400 hover:text-blue-500 cursor-pointer">Envie um arquivo</label> ou arraste e solte
+                      <label for="file-upload" class="font-medium hover:brightness-90 cursor-pointer inline-block" [style.color]="adminService.buttonColor()">Envie um arquivo</label> ou arraste e solte
                     </p>
                     <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF até 10MB</p>
                   </div>
@@ -192,7 +192,8 @@
               type="submit" 
               (click)="submitFeedback()" 
               [disabled]="!isFormValid() || isSubmitting()"
-              class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 ease-in-out disabled:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center">
+              [style.background-color]="adminService.buttonColor()"
+              class="w-full text-white font-bold py-2.5 px-4 rounded-md shadow-md hover:brightness-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 ease-in-out disabled:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center">
               @if (isSubmitting()) {
                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -206,7 +207,8 @@
           } @else {
             <button 
               (click)="resetForm()"
-              class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 ease-in-out">
+              [style.background-color]="adminService.buttonColor()"
+              class="w-full text-white font-bold py-2.5 px-4 rounded-md shadow-md hover:brightness-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 ease-in-out">
               Enviar Outro Feedback
             </button>
           }
